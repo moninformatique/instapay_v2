@@ -3,11 +3,11 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:instapay/Screens/Login/login.dart';
-import 'package:instapay/Screens/PinCode/components/numeric_pad.dart';
-import 'package:instapay/Screens/PinCode/components/top_pincode_screen.dart';
+import 'package:instapay/Screens/Loading/loading.dart';
+import '../Login/login.dart';
+import 'components/numeric_pad.dart';
+import 'components/top_pincode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Home/home_screen.dart';
 import 'components/pin_widget.dart';
 import '../../components/constants.dart';
 
@@ -27,7 +27,7 @@ class CreatePinCode extends StatefulWidget {
 }
 
 class _CreatePinCodeState extends State<CreatePinCode> {
-  String userImage = "assets/images/profile.png";
+  String userImage = "assets/logos/4-rb.png";
   String userMessage = "Enregistrez votre code PIN";
 
   bool codepinDisMatch = false;
@@ -55,7 +55,7 @@ class _CreatePinCodeState extends State<CreatePinCode> {
               children: [
                 // Les points de marquage d'entrer ou pas d'un chiffre du code PIN
                 PinWidget(
-                    pinLegth: 5,
+                    pinLength: 5,
                     controller: pincodeController,
                     onCompleted: (code) {
                       Navigator.push(
@@ -120,7 +120,7 @@ class SavePinCode extends StatefulWidget {
 }
 
 class _SavePinCodeState extends State<SavePinCode> {
-  String userImage = "assets/images/profile.png";
+  String userImage = "assets/logos/4-rb.png";
   String userMessage = "Confirmez votre code PIN";
 
   bool codepinDisMatch = false;
@@ -137,29 +137,16 @@ class _SavePinCodeState extends State<SavePinCode> {
 
     // Stocker dans la memoire de l'appareil
     await pref.setString("pin", pingHash);
+    await pref.setString("user", widget.userEmail);
     debugPrint("Code Pin : $code / $pingHash");
 
-    // Obtention des données de l'utilisateur enregistrées lors de la connexion ou l'inscription
-    String? userDataSaved = pref.getString("user");
-
-    if (userDataSaved != null) {
-      var userData = jsonDecode(userDataSaved);
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(userData: userData),
-          ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [Text("Aucune données, veuillez vous reconnecter")],
-      )));
-      dataNotFound = true;
-      codepinDisMatch = false;
-      await pref.clear();
-    }
-    setState(() {});
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Loading(
+              userEmail:
+                  widget.userEmail) /*HomeScreen(userEmail: widget.userEmail)*/,
+        ));
   }
 
   @override
@@ -184,7 +171,7 @@ class _SavePinCodeState extends State<SavePinCode> {
               children: [
                 // Les points de marquage d'entrer ou pas d'un chiffre du code PIN
                 PinWidget(
-                    pinLegth: 5,
+                    pinLength: 5,
                     controller: pincodeController,
                     onCompleted: (codePin) {
                       if (codePin == widget.pincode) {

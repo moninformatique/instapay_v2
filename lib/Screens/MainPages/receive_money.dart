@@ -69,12 +69,11 @@ class _ReceiveMoneyState extends State<ReceiveMoney> {
   }
 
   Container appBarBottomSection() {
-    String solde = "999.999.999";
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        color: kBackgroundColor,
+        color: kPrimaryColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),

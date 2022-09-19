@@ -1,13 +1,15 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:instapay/Screens/PinCode/create_pin_code.dart';
+import 'package:instapay/Screens/Login/components/reset_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../PinCode/create_pin_code.dart';
 import '../../../components/constants.dart';
 
 ///
@@ -36,71 +38,37 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final formKey = GlobalKey<FormState>();
+  bool loading = false;
   bool obscuretext = true;
+  bool forgetPassword = false;
+  bool isSubmitEnable = false;
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  // Fonction de traitement de la connexion au serveur
-  void signIn() async {
-    debugPrint("Exécution de la fonction de connexion ");
+  @override
+  void initState() {
+    super.initState();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
 
-    // Verifier que tous les champs sont remplis avant d'entreprendre quoique ce soit
-    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      //hasher le mot de passe avant de l'enoyer à l'api
-      debugPrint("Hashage du mot de passe");
-      var encodePassword = utf8.encode(passwordController.text);
-      String passwordHashed = sha256.convert(encodePassword).toString();
-      debugPrint(passwordHashed);
+    emailController.addListener(() {
+      var email = EmailValidator.validate(emailController.text);
+      passwordController.addListener(() {
+        var password = passwordController.text.length >= 8;
 
-      try {
-        debugPrint("Tentative de connexion");
-        Response response = await post(Uri.parse('${api}login/'),
-            body: jsonEncode(<String, String>{
-              "contact": emailController.text,
-              "password": passwordHashed
-            }),
-            headers: <String, String>{"Content-Type": "application/json"});
-
-        debugPrint("requete de connexion envoyée");
-        debugPrint("Code de la reponse : [${response.statusCode}]");
-        debugPrint("Contenue de la reponse : ${response.body}");
-
-        if (response.statusCode == 200) {
-          debugPrint("La connexion à été éffectué");
-          createPincode(response.body.toString());
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Connexion échouée [Code http : ${response.statusCode} ]")
-            ],
-          )));
-        }
-      } catch (e) {
-        debugPrint("Une erreur est survenue : \n $e");
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [Text("Remplissez tous les champs")],
-      )));
-    }
+        setState(() {
+          isSubmitEnable = (email && password) ? true : false;
+        });
+      });
+    });
   }
 
-  // Fonction de chargement de la page de creation de code PIN
-  void createPincode(String jsonData) async {
-    debugPrint(" Chargement de la page d'accueil");
-
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    await pref.setString("user", jsonData);
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => CreatePinCode(
-                  userEmail: jsonDecode(jsonData)['contact'],
-                )));
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -110,144 +78,249 @@ class _LoginFormState extends State<LoginForm> {
       duration: widget.animationDuration * 4,
       child: Align(
         alignment: Alignment.center,
-        child: SizedBox(
-          width: widget.size.width,
-          height: widget.defaultLoginSize,
-          child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: mediumPadding),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
-                  height: mediumPadding,
-                ),
-
-                // Texte de bienvenue
-                const Text(
-                  'Bienvenue sur InstaPay',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                const SizedBox(height: 40),
-
-                // Image de connexion
+                // Titre
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Spacer(),
-                    Expanded(
-                      flex: 2,
-                      child: SvgPicture.asset(
-                        "assets/icons/login.svg",
-                        height: 150,
-                      ),
+                    Text(
+                      'InstaPay',
+                      style: GoogleFonts.ultra(
+                          textStyle: const TextStyle(
+                              fontSize: 35, color: kPrimaryColor)),
                     ),
-                    const Spacer(),
                   ],
                 ),
-                const SizedBox(height: bigMediumPadding * 2),
 
-                // Fonrmulaire de connexion
-                Form(
-                  key: formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    children: [
-                      // Champ Email
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: mediumPadding),
-                        child: TextFormField(
-                          controller: emailController,
-                          obscureText: false,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.mail_outline),
-                            hintText: "Email",
-                          ),
-                          validator: (email) {
-                            return email != null &&
-                                    !EmailValidator.validate(email)
-                                ? "Entrez un email valide"
-                                : null;
-                          },
-                        ),
-                      ),
-
-                      // Champ mot de passe
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: mediumPadding,
-                            vertical: defaultPadding),
-                        child: TextFormField(
-                          controller: passwordController,
-                          obscureText: obscuretext,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            // Afficer ou cacher le mot de passe
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  obscuretext = !obscuretext;
-                                });
-                              },
-                              child: Icon(obscuretext
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
-                            ),
-                            hintText: "Mot d epasse",
-                          ),
-                          validator: (password) {
-                            return password != null && password.length < 8
-                                ? "Mot de passe trop court"
-                                : null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(
-                        height: mediumPadding,
-                      ),
-
-                      // Boutton de connexion
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: mediumPadding,
-                        ),
-                        child: SizedBox(
-                          height: 60,
-                          width: 200,
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(),
-                              onPressed: () {
-                                final isValidForm =
-                                    formKey.currentState!.validate();
-                                if (isValidForm) {
-                                  debugPrint(
-                                      "Connexion de l'utilisateur : [${emailController.text} / ${passwordController.text}");
-                                  signIn();
-                                } else {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                          content: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Text(
-                                          "Vos informations ne sont pas valides")
-                                    ],
-                                  )));
-                                }
-                              },
-                              child: Text("Se connecteer".toUpperCase())),
-                        ),
-                      ),
-                    ],
-                  ),
+                // Message
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Welcome !",
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 30),
+
+                // Formulaire
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: largePadding * 3,
+                    ),
+                    // Fonrmulaire de connexion
+                    Form(
+                      key: formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        children: [
+                          // Champ de l'adresse Mail
+                          TextFormField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              prefixIcon: Icon(Icons.alternate_email),
+                              hintText: "Email",
+                            ),
+                            validator: (email) {
+                              return email != null &&
+                                      !EmailValidator.validate(email)
+                                  ? "Adresse mail invalide"
+                                  : null;
+                            },
+                          ),
+
+                          const SizedBox(height: defaultPadding),
+                          // Champ du mot de passe
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: obscuretext,
+                            keyboardType: TextInputType.text,
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.password),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    obscuretext = !obscuretext;
+                                  });
+                                },
+                                child: Icon(obscuretext
+                                    ? Icons.visibility
+                                    : Icons.visibility_off),
+                              ),
+                              hintText: "Mot de passe",
+                            ),
+                            validator: (password) {
+                              return password != null && password.length < 8
+                                  ? "Mot de passe trop court"
+                                  : null;
+                            },
+                          ),
+
+                          const SizedBox(height: defaultPadding),
+                          if (forgetPassword)
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ResetPassword(
+                                                userEmail: emailController.text,
+                                              )));
+                                },
+                                child: const Text(
+                                  "Mot de passe oublié ?",
+                                  style: TextStyle(color: kWeightBoldColor),
+                                )),
+                          const SizedBox(height: mediumPadding),
+                          // Champ de soumission du formulaire
+                          loading
+                              ? const CircularProgressIndicator(
+                                  color: kPrimaryColor,
+                                  strokeWidth: 5,
+                                )
+                              :
+                              // Boutton de connexion
+                              ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      onSurface: kPrimaryColor),
+                                  onPressed: (isSubmitEnable)
+                                      ? () {
+                                          final isValidForm =
+                                              formKey.currentState!.validate();
+                                          if (isValidForm) {
+                                            debugPrint(
+                                                "Formulaire valide ... ");
+                                            setState(() {
+                                              loading = true;
+                                            });
+                                            signIn();
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: const [
+                                                Text(
+                                                    "Vos informations ne sont pas valides")
+                                              ],
+                                            )));
+                                          }
+                                        }
+                                      : null,
+                                  child: Text("Se connecteer".toUpperCase())),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  // Fonction de traitement de la connexion au serveur
+  void signIn() async {
+    debugPrint("Exécution de la fonction de connexion ... ");
+
+    SharedPreferences pref = await SharedPreferences.getInstance();
+
+    //hasher le mot de passe avant de l'enoyer à l'api
+    var encodePassword = utf8.encode(passwordController.text);
+    String passwordHashed = sha256.convert(encodePassword).toString();
+
+    try {
+      debugPrint("[..] Connexion de l'utilisateur ${emailController.text} ");
+      Response response = await post(Uri.parse('${api}login/token/'),
+          body: "email=${emailController.text}&password=$passwordHashed",
+          headers: <String, String>{
+            "Content-Type": "application/x-www-form-urlencoded"
+          });
+
+      debugPrint("  --> Envoie de la requete de connexion");
+      debugPrint("  --> Code de la reponse : [${response.statusCode}]");
+      debugPrint("  --> Contenue de la reponse : ${response.body}");
+
+      setState(() {
+        loading = false;
+      });
+      if (response.statusCode == 200) {
+        debugPrint("[OK] Connexion éffectué avec succès");
+        await pref.setString("token", response.body.toString());
+        await pref.setString("user", emailController.text);
+        createPincode(emailController.text);
+      } else {
+        debugPrint("[X] Connexion échoué : HTTP ${response.statusCode}");
+        if (response.statusCode == 401) {
+          setState(() {
+            forgetPassword = true;
+          });
+          showInformation(context, false,
+              "Ces informations ne correspondent a aucun compte actif");
+        } else {
+          showInformation(context, false, "Verifiez votre connexion internet");
+        }
+      }
+    } catch (e) {
+      debugPrint("[X] Une erreur est survenue : \n $e");
+      setState(() {
+        loading = false;
+      });
+      showInformation(context, false, "Vérifiez votre connexion internet");
+    }
+  }
+
+  // Fonction de chargement de la page de creation de code PIN
+  void createPincode(String userEmail) {
+    debugPrint(" Chargement de la page d'accueil");
+    emailController.clear();
+    passwordController.clear();
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreatePinCode(userEmail: userEmail)),
+        (route) => false);
+  }
+
+  showInformation(BuildContext context, bool isSuccess, String message) {
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Row(
+        children: [
+          Icon(
+            isSuccess ? Icons.check_circle : Icons.error,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+        ],
+      ),
+      //behavior: SnackBarBehavior.floating,
+      backgroundColor: isSuccess ? successColor : errorColor,
+      //elevation: 3,
+    ));
   }
 }

@@ -38,11 +38,16 @@ dependencies:
   http: ^0.13.5
   crypto: ^3.0.2
   flutter_svg: ^1.1.4
-  passcode_screen: ^2.0.1
   barcode_widget: ^2.0.3
   flutter_barcode_scanner: ^2.0.0
   google_fonts: ^3.0.1
   email_validator: ^2.1.17
+  local_auth: ^2.1.2
+  internet_connection_checker: ^0.0.1+4
+  get: ^4.6.5
+  flutter_native_splash: ^2.2.9
+  connectivity_plus: ^2.3.6+1
+  
   
 
 dev_dependencies:
@@ -60,9 +65,13 @@ dev_dependencies:
 
 flutter_icons:
   android: true
-  #ios: true
-  image_path: "assets/icons/logo.png"
+  image_path: "assets/logos/4-rb.png"
+  adaptative_icon_background: "#ffffff"
+  adaptative_icon_foreground: "assets/logos/4.png"
 
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/logos/4-rb.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -76,8 +85,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/
     - assets/images/
     - assets/icons/
+    - assets/logos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -101,6 +112,6 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  #
+  
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

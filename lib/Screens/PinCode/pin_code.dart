@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:instapay/Screens/PinCode/create_pin_code.dart';
+import 'package:instapay/components/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/numeric_pad.dart';
@@ -19,8 +20,8 @@ import '../Login/login.dart';
 /// le permettra d'acceder à la page d'accueil de l'application.
 
 class PinCodeAuth extends StatefulWidget {
-  final String userContact;
-  const PinCodeAuth({Key? key, required this.userContact}) : super(key: key);
+  final String userEmail;
+  const PinCodeAuth({Key? key, required this.userEmail}) : super(key: key);
 
   @override
   State<PinCodeAuth> createState() => _PinCodeAuthState();
@@ -29,7 +30,6 @@ class PinCodeAuth extends StatefulWidget {
 class _PinCodeAuthState extends State<PinCodeAuth> {
   bool forgetPin = false;
   PinController pincodeController = PinController();
-  List<int> firstRow = [1, 2, 3], secondRow = [4, 5, 6], thirdRow = [7, 8, 9];
 
   // Fonction de vérification de l'exactitude du code PIN entré
   verifyCodePin(String code) async {
@@ -46,14 +46,17 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
       if (pinSaved == pinEntred) {
         // Le code PIN entré est correct
         debugPrint("Le code PIN est correcte");
-        String? savedData = pref.getString("user");
+        String? userEmail = pref.getString("user");
 
-        if (savedData != null) {
-          Map<String, dynamic> userData = jsonDecode(savedData);
-          Navigator.push(
+        if (userEmail != null) {
+          //Map<String, dynamic> userData = jsonDecode(savedData);
+          for (var i = 0; i < 5; i++) {
+            pincodeController.delete();
+          }
+          Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(
-                  builder: (context) => HomeScreen(userData: userData)));
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+              (route) => false);
         }
       } else {
         // le code PIN entré est incorret
@@ -74,7 +77,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
           context,
           MaterialPageRoute(
             builder: (context) => CreatePinCode(
-              userEmail: widget.userContact,
+              userEmail: widget.userEmail,
             ),
           ));
     }
@@ -110,15 +113,15 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
                   },
                   child: const Text(
                     "Déconnexion",
-                    style: TextStyle(color: Colors.red, fontSize: 10),
+                    style: TextStyle(color: Colors.red, fontSize: 12),
                   )),
             ],
           ),
 
           // Partie supérieur de la page
           TopPincodeScreen(
-            userEmail: widget.userContact,
-            userImage: "assets/images/profile.png",
+            userEmail: widget.userEmail,
+            userImage: "assets/logos/4-rb.png",
             userMessage: "Bon retour",
           ),
 
@@ -128,7 +131,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
             child: Column(
               children: [
                 PinWidget(
-                    pinLegth: 5,
+                    pinLength: 5,
                     controller: pincodeController,
                     onCompleted: (pincode) {
                       verifyCodePin(pincode);
@@ -142,7 +145,7 @@ class _PinCodeAuthState extends State<PinCodeAuth> {
               ? TextButton(
                   onPressed: () {},
                   child: const Text("Code Pin oublié ?",
-                      style: TextStyle(color: Colors.black, fontSize: 12)),
+                      style: TextStyle(color: kWeightBoldColor, fontSize: 12)),
                 )
               : Container(),
 

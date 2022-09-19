@@ -3,20 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import '../../components/constants.dart';
+import '../../../components/constants.dart';
 
 class SendMoney extends StatefulWidget {
-  final String userID;
-  final String solde;
-  final String sendCode;
-  final String receiveCode;
-  const SendMoney(
-      {Key? key,
-      required this.userID,
-      required this.solde,
-      required this.sendCode,
-      required this.receiveCode})
-      : super(key: key);
+  const SendMoney({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<SendMoney> createState() => _SendMoneyState();
@@ -27,6 +19,12 @@ class _SendMoneyState extends State<SendMoney> {
   TextEditingController amountToSendController = TextEditingController();
   String mysolde = "0";
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
+  }
+
+/*
   void accountRequest(String userID) async {
     Map<String, dynamic> account = jsonDecode("{}");
 
@@ -72,12 +70,11 @@ class _SendMoneyState extends State<SendMoney> {
   }
 
   Container appBarBottomSection() {
-    String solde = "999.999.999";
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        color: kBackgroundColor,
+        color: kPrimaryColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),
@@ -296,4 +293,5 @@ class _SendMoneyState extends State<SendMoney> {
       ),
     );
   }
+*/
 }

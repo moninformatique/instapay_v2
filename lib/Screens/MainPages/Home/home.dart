@@ -1,24 +1,183 @@
-import 'dart:convert';
+//import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+//import 'package:http/http.dart';
 
-import '../../components/constants.dart';
-import 'component/model.dart';
+import '../../../components/constants.dart';
+import '../Transactions/transactions_summary.dart';
+//import '../component/model.dart';
 
 class Home extends StatefulWidget {
-  final String userID;
-  final String solde;
-  const Home({Key? key, required this.userID, required this.solde})
-      : super(key: key);
+  //final String userID;
+  //final String solde;
+  const Home({
+    Key? key,
+    /*required this.userID, required this.solde*/
+  }) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  @override
+  Widget build(BuildContext coontext) {
+    return SafeArea(
+        child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: kToolbarHeight,
+          ),
+          card(),
+          const SizedBox(
+            height: largePadding,
+          ),
+          const TransactionsSummary(),
+        ],
+      ),
+    ));
+  }
+
+  Widget card() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      //margin: const EdgeInsets.symmetric(horizontal: defaultPadding),
+      height: 250,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        color: kPrimaryColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: kSimpleTextColor.withOpacity(0.4),
+            offset: const Offset(0, 8),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // Ce widget Column est contitué de deux autres widgets Row, qui divise la carte en deux partie Supérieure et Inférieure
+        // 1er Row : Partie supérieure qui contient un logo
+        // 2e Row : Partie inférieure en inférieur qui contient d'autres informations du compte
+        children: [
+          // Partie Supérieure
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // Logo sur la carte
+              Container(
+                height: 50,
+                width: 50,
+                decoration: const BoxDecoration(
+                    color: kBackgroundBodyColor,
+                    borderRadius: BorderRadius.all(Radius.circular(50))),
+                child: Center(
+                  child: Image.asset(
+                    "assets/logos/4-rb.png",
+                  ),
+                ),
+              )
+            ],
+          ),
+
+          // Partie inférieure
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Ce widget Row est contitué de deux autre widgets Column qui divisent la partie inférieure en deux autre partie
+            // 1er Column : Partie gauche : Information du compte
+            // 2e Column : Partie droite : Boutons d'actions
+            children: [
+              //Partie gauche
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Label solde
+                  const Text(
+                    "Solde",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  // Montant solde
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      // Montant
+                      Text(
+                        "567,598",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      SizedBox(
+                        width: 5,
+                      ),
+                      // Devise
+                      Text("Fcfa",
+                          style: TextStyle(color: Colors.white, fontSize: 15)),
+                    ],
+                  ),
+                ],
+              ),
+
+              //Partie droite
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    tooltip: "Scanner un QR code",
+                    onPressed: () {
+                      debugPrint("Scanner un QR code");
+                    },
+                    icon: const Icon(
+                      Icons.qr_code_scanner,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: "Voir mon QR code",
+                    onPressed: () {
+                      debugPrint("Voir mon QR code");
+                    },
+                    icon: const Icon(
+                      Icons.qr_code_2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: "Se recharger",
+                    onPressed: () {
+                      debugPrint("Se rrecharge");
+                    },
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  /*
   String mysolde = "0";
-  dynamic? transactionsItem;
+  dynamic transactionsItem;
 
   void accountRequest(String userID) async {
     Map<String, dynamic> account = jsonDecode("{}");
@@ -162,7 +321,7 @@ class _HomeState extends State<Home> {
       padding: const EdgeInsets.symmetric(horizontal: 30),
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        color: kBackgroundColor,
+        color: kPrimaryColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),
@@ -328,8 +487,7 @@ class _HomeState extends State<Home> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [Text("Aucune transaction éffectuée")],
       );
-    }
-     else {
+    } else {
       return ListView.separated(
         primary: false,
         shrinkWrap: true,
@@ -375,4 +533,5 @@ class _HomeState extends State<Home> {
       );
     }
   }
+  */
 }

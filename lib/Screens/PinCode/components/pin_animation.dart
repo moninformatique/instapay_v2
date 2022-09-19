@@ -71,7 +71,7 @@ class _PinAnimationState extends State<PinAnimation>
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(_sizeAnimation.value / 2),
-          color: pin == '' ? kPrimaryLightColor : kBackgroundColor,
+          color: pin == '' ? kPrimaryLightColor : kPrimaryColor,
         ),
         child: Opacity(
           opacity: _opacityAnimation.value,
